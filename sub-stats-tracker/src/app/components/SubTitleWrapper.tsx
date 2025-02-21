@@ -17,18 +17,19 @@
 import { useCallback, useEffect, useState } from "react"
 import SubTitleText from "./SubTitleText"
 export default function SubTitleWrapper() {
-    const [clipboardText, setClipboardText] = useState('')
-
+    const [subtitles, setSubtitles] = useState<string[]>([])
     
    const fetchCopiedText = useCallback(async () => {
-
     try {
       const text = await navigator.clipboard.readText()
-      setClipboardText(text)
-    } catch (error) {
+      if(text && (!subtitles.length || subtitles[subtitles.length - 1] !== text)) {
+        setSubtitles(prev => [...prev, text])
+      }
+
+    } catch (error) { 
         //document is not focused ignore
     }
-   },[])
+   },[subtitles])
 
    useEffect(() => {
     const interval = setInterval(fetchCopiedText,300)
@@ -37,8 +38,10 @@ export default function SubTitleWrapper() {
    }, [fetchCopiedText])
 
   return (
-    <>
-        <SubTitleText text={clipboardText}/>
-    </> 
+    <div>
+      {subtitles.map((text, index) => (
+        <SubTitleText text={text} key={index}/>
+      ))}
+    </div>
   )
 }
