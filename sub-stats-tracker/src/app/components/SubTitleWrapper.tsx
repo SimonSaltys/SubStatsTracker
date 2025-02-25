@@ -14,22 +14,35 @@
 
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { createContext, useCallback, useEffect, useReducer, useState } from "react"
 import SubTitleText from "./SubTitleText"
+import { SubTitleHolderInitalData, SubtitleHolderState } from "../types/SubtitleTypes"
+import SubTitleStateReducer, { SubtitleHolderAction } from "../functions/reducers/subtitleReducer"
+
+export interface SubtitleContextData {
+  state: SubtitleHolderState,
+  dispatch: React.Dispatch<SubtitleHolderAction>
+}
+
+export const SubtitleContext = createContext<SubtitleContextData | ''>('')
+
 export default function SubTitleWrapper() {
-    const [subtitles, setSubtitles] = useState<string[]>([])
-    
+  const [state, dispatch] = useReducer(SubTitleStateReducer, SubTitleHolderInitalData)
+
    const fetchCopiedText = useCallback(async () => {
     try {
       const text = await navigator.clipboard.readText()
-      if(text && (!subtitles.length || subtitles[subtitles.length - 1] !== text)) {
-        setSubtitles(prev => [...prev, text])
+      if(text && (!state.subtitles.length || state.subtitles[state.subtitles.length - 1] !== text)) {
+        dispatch({
+          type: "ADD_SUBTITLE",
+          payload: text
+        })
       }
 
     } catch (error) { 
         //document is not focused ignore
     }
-   },[subtitles])
+   },[state.subtitles])
 
    useEffect(() => {
     const interval = setInterval(fetchCopiedText,300)
@@ -38,6 +51,8 @@ export default function SubTitleWrapper() {
    }, [fetchCopiedText])
 
   return (
+    <SubtitleContext.Provider value={{state, dispatch}}>
+
     <div className="flex-col">
       {
       <SubTitleText text={"Hello World"} key={0} />
@@ -49,5 +64,7 @@ export default function SubTitleWrapper() {
        <SubTitleText text={"Hello World Part 2"} key={1} />
       }
     </div>
+
+    </SubtitleContext.Provider>
   )
 }
