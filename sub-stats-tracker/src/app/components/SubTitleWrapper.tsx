@@ -18,6 +18,7 @@ import { createContext, useCallback, useEffect, useReducer, useState } from "rea
 import SubTitleText from "./SubTitleText"
 import { SubTitleHolderInitalData, SubtitleHolderState } from "../types/SubtitleTypes"
 import SubTitleStateReducer, { SubtitleHolderAction } from "../functions/reducers/subtitleReducer"
+import NavBar from "./navbar/NavBar"
 
 export interface SubtitleContextData {
   state: SubtitleHolderState,
@@ -46,6 +47,7 @@ export default function SubTitleWrapper() {
 
    useEffect(() => {
     const interval = setInterval(fetchCopiedText,300)
+    
 
     return () => clearInterval(interval)
    }, [fetchCopiedText])
@@ -53,16 +55,14 @@ export default function SubTitleWrapper() {
   return (
     <SubtitleContext.Provider value={{state, dispatch}}>
 
+    <NavBar/>
+
+
     <div className="flex-col">
       {
-      <SubTitleText text={"Hello World"} key={0} />
-      /* {subtitles.map((text, index) => (
-        <SubTitleText text={text} key={index}/>
-      ))} */}
-
-      {
-       <SubTitleText text={"Hello World Part 2"} key={1} />
-      }
+       state.subtitles.map((text, index) => (
+        <SubTitleText text={text} id={index} key={index}/>
+      ))}
     </div>
 
     </SubtitleContext.Provider>

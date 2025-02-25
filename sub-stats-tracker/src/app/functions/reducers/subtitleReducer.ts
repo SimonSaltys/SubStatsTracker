@@ -10,12 +10,12 @@ export type SubtitleHolderAction =
 
         switch(action.type) {
             case "ADD_SUBTITLE":
-                return {...state, subtitles: [...state.subtitles, action.payload]}
+                return {subtitles: [...state.subtitles, action.payload]}
             case "REMOVE_SUBTITLE":
-                let removedArray = state.subtitles
-                removedArray.splice(action.payload)
-
-                return {...state, subtitles: removedArray}
+                let removedArray = [...state.subtitles]; 
+                removedArray.splice(action.payload, 1); 
+                
+                return {subtitles: removedArray}
             default:
                 return state        
         }
