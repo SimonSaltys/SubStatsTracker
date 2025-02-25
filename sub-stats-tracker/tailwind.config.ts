@@ -12,7 +12,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         ObsidianMoss: "#1E201E",
-        IronWood: "3C3D37",
+        IronWood: "#3C3D37",
         SageSmoke: "#697565",
         ParchmentGlow: "#ECDFCC"
       },

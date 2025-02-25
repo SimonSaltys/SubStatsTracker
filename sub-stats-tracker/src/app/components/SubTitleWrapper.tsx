@@ -38,10 +38,16 @@ export default function SubTitleWrapper() {
    }, [fetchCopiedText])
 
   return (
-    <div>
-      {subtitles.map((text, index) => (
+    <div className="flex-col">
+      {
+      <SubTitleText text={"Hello World"} key={0} />
+      /* {subtitles.map((text, index) => (
         <SubTitleText text={text} key={index}/>
-      ))}
+      ))} */}
+
+      {
+       <SubTitleText text={"Hello World Part 2"} key={1} />
+      }
     </div>
   )
 }

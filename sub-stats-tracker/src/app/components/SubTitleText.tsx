@@ -15,9 +15,10 @@
 export default function SubTitleText(props : {text : String}) {
     return(
         <>
-            <div>
-                <p>{props.text}</p>
+            <div className="my-5 ml-5 text-[1.2rem] font-medium leading-7 shadow-md">
+                <p id="subtitle-text">{props.text}</p>
             </div>
         </>
     )
 }
+
