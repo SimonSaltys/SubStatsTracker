@@ -17,6 +17,10 @@ const dark = {
   settings: " bg-ObsidianMoss text-ParchmentGlow"
 }
 
+const light = {
+  settings: "bg-white text-AshGray"
+}
+
 export const metadata: Metadata = {
   title: "Subtitle Text Tracker",
   description: "Created by Simon Saltikov",
@@ -30,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${dark.settings} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${light.settings} antialiased`}
       >
         {children}
       </body>

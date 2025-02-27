@@ -1,4 +1,4 @@
-import SubTitleWrapper from "@/app/components/SubTitleWrapper"
+import SubTitleWrapper from "./components/subtitles/SubTitleWrapper";
 
 export default function Home() {
   return (

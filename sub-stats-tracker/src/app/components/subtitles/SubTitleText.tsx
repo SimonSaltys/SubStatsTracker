@@ -4,8 +4,6 @@
  * Displays the current line of text that the media player 
  * has copied to the clipboard.
  * 
- * todo: 
- *    css styling (on hover effect)
  */
 
 

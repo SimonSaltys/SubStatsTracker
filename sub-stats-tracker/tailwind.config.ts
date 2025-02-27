@@ -11,6 +11,9 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        White: "#ffffff",
+        Purple: "#4D47C8",
+        AshGray: "#36454F",
         Obsidian: "#121412",
         ObsidianMoss: "#1E201E",
         IronWood: "#3C3D37",

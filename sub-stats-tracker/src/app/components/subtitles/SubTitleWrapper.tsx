@@ -14,11 +14,11 @@
 
 "use client"
 
-import { createContext, useCallback, useEffect, useReducer, useState } from "react"
-import SubTitleText from "./SubTitleText"
-import { SubTitleHolderInitalData, SubtitleHolderState } from "../types/SubtitleTypes"
-import SubTitleStateReducer, { SubtitleHolderAction } from "../functions/reducers/subtitleReducer"
-import NavBar from "./navbar/NavBar"
+import { createContext, useCallback, useEffect, useReducer} from "react"
+import SubTitleText from "@/app/components/subtitles/SubTitleText"
+import { SubtitleHolderState, SubtitleHolderInitalData } from "@/app/types/SubtitleTypes"
+import SubTitleStateReducer, {SubtitleHolderAction} from "@/app/functions/reducers/subtitleReducer"
+import NavBar from "@/app/components/navbar/NavBar"
 
 export interface SubtitleContextData {
   state: SubtitleHolderState,
@@ -28,7 +28,7 @@ export interface SubtitleContextData {
 export const SubtitleContext = createContext<SubtitleContextData | ''>('')
 
 export default function SubTitleWrapper() {
-  const [state, dispatch] = useReducer(SubTitleStateReducer, SubTitleHolderInitalData)
+  const [state, dispatch] = useReducer(SubTitleStateReducer, SubtitleHolderInitalData)
 
    const fetchCopiedText = useCallback(async () => {
     try {

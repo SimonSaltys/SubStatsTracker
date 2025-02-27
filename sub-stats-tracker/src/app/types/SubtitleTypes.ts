@@ -2,6 +2,6 @@ export interface SubtitleHolderState {
     subtitles: string[]
 }
 
-export const SubTitleHolderInitalData : SubtitleHolderState = {
+export const SubtitleHolderInitalData : SubtitleHolderState = {
     subtitles: []
 }
