@@ -1,5 +1,5 @@
 /**
- * sub-stats-tracker\src\app\components\SubTitleWrapper.tsx
+ * sub-stats-tracker/src/app/components/subtitles/SubTitleWrapper.tsx
  * 
  * The main wrapper of this project. Shows the subtitle texts that have been displayed 
  * so far and holds the configuration component the user can modify 
@@ -14,57 +14,41 @@
 
 "use client"
 
-import { createContext, useCallback, useEffect, useReducer} from "react"
+import {useCallback, useContext, useEffect} from "react"
 import SubTitleText from "@/app/components/subtitles/SubTitleText"
-import { SubtitleHolderState, SubtitleHolderInitalData } from "@/app/types/SubtitleTypes"
-import SubTitleStateReducer, {SubtitleHolderAction} from "@/app/functions/reducers/subtitleReducer"
-import NavBar from "@/app/components/navbar/NavBar"
+import { readInSubtitleLine } from "@/app/functions/subtitleUtils"
+import { SubtitleContext } from "../ClientWrapper"
+import { SubtitleContextData } from "@/app/types/subtitleTypes"
+import { Resizable } from 'react-resizable';
 
-export interface SubtitleContextData {
-  state: SubtitleHolderState,
-  dispatch: React.Dispatch<SubtitleHolderAction>
-}
 
-export const SubtitleContext = createContext<SubtitleContextData | ''>('')
 
 export default function SubTitleWrapper() {
-  const [state, dispatch] = useReducer(SubTitleStateReducer, SubtitleHolderInitalData)
+      const context = useContext(SubtitleContext) as SubtitleContextData
+      const state = context.state
+      const dispatch = context.dispatch
+  
 
+    //get the text from the clipboard (todo, remove when able to read from video itself)
    const fetchCopiedText = useCallback(async () => {
-    try {
-      const text = await navigator.clipboard.readText()
-      if(text && (!state.subtitles.length || state.subtitles[state.subtitles.length - 1] !== text)) {
-        dispatch({
-          type: "ADD_SUBTITLE",
-          payload: text
-        })
-      }
 
-    } catch (error) { 
-        //document is not focused ignore
-    }
+      readInSubtitleLine(state,dispatch)
+
    },[state.subtitles])
 
+   //repeatedly check the clipboard (todo, remove when able to read from video itself)
    useEffect(() => {
     const interval = setInterval(fetchCopiedText,300)
-    
-
     return () => clearInterval(interval)
    }, [fetchCopiedText])
 
   return (
-    <SubtitleContext.Provider value={{state, dispatch}}>
-
-    <NavBar/>
-
-
-    <div className="flex-col">
+    <div >
       {
        state.subtitles.map((text, index) => (
         <SubTitleText text={text} id={index} key={index}/>
       ))}
     </div>
 
-    </SubtitleContext.Provider>
   )
 }

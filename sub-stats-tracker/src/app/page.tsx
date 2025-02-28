@@ -1,9 +1,9 @@
-import SubTitleWrapper from "./components/subtitles/SubTitleWrapper";
+import ClientWrapper from "./components/ClientWrapper";
 
 export default function Home() {
   return (
     <>
-    <SubTitleWrapper/>
+    <ClientWrapper/>
     </>
   );
 }

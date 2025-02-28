@@ -1,8 +1,15 @@
+/**
+ * sub-stats-tracker/src/app/functions/subtitleUtils.ts
+ * 
+ * holds the util functions to be used by subtitle components
+ * 
+ */
+
 import { Dispatch } from "react"
-import { SubtitleHolderState } from "../types/SubtitleTypes"
+import { SubtitleHolderState } from "@/app/types/subtitleTypes"
 import { SubtitleHolderAction } from "./reducers/subtitleReducer"
 
-async function readInSubtitleLine(state : SubtitleHolderState, dispatch : Dispatch<SubtitleHolderAction> ) {
+export async function readInSubtitleLine(state : SubtitleHolderState, dispatch : Dispatch<SubtitleHolderAction> ) {
     try {
           const text = await navigator.clipboard.readText()
           if(text && (!state.subtitles.length || state.subtitles[state.subtitles.length - 1] !== text)) {

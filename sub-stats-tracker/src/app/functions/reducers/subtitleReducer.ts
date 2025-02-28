@@ -1,4 +1,10 @@
-import { SubtitleHolderState } from "@/app/types/SubtitleTypes";
+/**
+ * sub-stats-tracker/src/app/functions/reducers/subtitleReducer.ts
+ * 
+ * Holds the reducers for subtitle componenents
+ * 
+ */
+import { SubtitleHolderState } from "@/app/types/subtitleTypes";
 
 export type SubtitleHolderAction = 
  | { type: "ADD_SUBTITLE"; payload: string }

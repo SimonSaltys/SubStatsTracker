@@ -1,5 +1,5 @@
 /**
- * sub-stats-tracker/src/app/components/NavBar.jsx
+ * sub-stats-tracker/src/app/components/navbar/NavBar.tsx
  * 
  * Holds the navagation for the site including the stats page and config dropdown
  * 
