@@ -11,7 +11,7 @@ export interface SubtitleHolderState {
 }
 
 export const SubtitleHolderInitalData : SubtitleHolderState = {
-    subtitles: ["ewadewae"]
+    subtitles: []
 }
 
 export interface SubtitleContextData {

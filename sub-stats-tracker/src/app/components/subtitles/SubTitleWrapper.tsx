@@ -14,20 +14,25 @@
 
 "use client"
 
-import {useCallback, useContext, useEffect} from "react"
+import {useCallback, useContext, useEffect, useState} from "react"
 import SubTitleText from "@/app/components/subtitles/SubTitleText"
 import { readInSubtitleLine } from "@/app/functions/subtitleUtils"
 import { SubtitleContext } from "../ClientWrapper"
 import { SubtitleContextData } from "@/app/types/subtitleTypes"
-import { Resizable } from 'react-resizable';
+import { ResizableBox } from "react-resizable"
+import "react-resizable/css/styles.css";
+
 
 
 
 export default function SubTitleWrapper() {
       const context = useContext(SubtitleContext) as SubtitleContextData
+      const [dimentions, setDimentions] = useState({width: 300, height: 300})
       const state = context.state
       const dispatch = context.dispatch
   
+
+
 
     //get the text from the clipboard (todo, remove when able to read from video itself)
    const fetchCopiedText = useCallback(async () => {
@@ -42,13 +47,20 @@ export default function SubTitleWrapper() {
     return () => clearInterval(interval)
    }, [fetchCopiedText])
 
-  return (
-    <div >
-      {
-       state.subtitles.map((text, index) => (
-        <SubTitleText text={text} id={index} key={index}/>
-      ))}
-    </div>
+   useEffect(() => {
+      if(typeof window !== "undefined")
+        setDimentions({width : window.innerWidth/3,height: window.innerHeight})
+   },[])
 
+  return (
+      <ResizableBox className="w-1/3 h-screen border-r border-gray-300" width={dimentions.width} height={dimentions.height}
+                    minConstraints={[250,dimentions.height]}
+                    axis="x"
+                    resizeHandles={["e"]}>
+            {
+          state.subtitles.map((text, index) => (
+            <SubTitleText text={text} id={index} key={index}/>
+          ))}
+      </ResizableBox>
   )
 }

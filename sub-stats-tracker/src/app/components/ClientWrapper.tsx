@@ -22,7 +22,9 @@ export default function ClientWrapper() {
             <NavBar/>
 
             <SubtitleContext.Provider value={{state, dispatch}}>
+                <div>
                     <SubTitleWrapper/>
+                </div>
             </SubtitleContext.Provider>
         </>
        
