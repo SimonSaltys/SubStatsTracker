@@ -26,7 +26,7 @@ export default function SubTitleText(props : {text : String, id: number }) {
     }
 
     return(
-            <div className="pt-5 ml-5 text-[1.2rem] font-medium leading-7 flex items-center justify-between">
+            <div className="pt-5 ml-5 flex items-center justify-between">
                 <p className="mr-2">{props.text}</p>
                 
                 <button 

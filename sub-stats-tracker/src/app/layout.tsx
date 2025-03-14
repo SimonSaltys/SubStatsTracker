@@ -1,6 +1,5 @@
-//todo make dark and light
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
 
@@ -14,13 +13,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const dark = {
-  settings: " bg-ObsidianMoss text-ParchmentGlow"
-}
-
-const light = {
-  settings: "bg-white text-AshGray"
-}
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-noto-sans-jp",
+  subsets: ["latin"]
+});
 
 export const metadata: Metadata = {
   title: "Subtitle Text Tracker",
@@ -29,22 +25,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <Head>
-        <meta 
-          name="viewport" 
-          content="width=device-width, initial-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" 
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover"
         />
-        {/* Add more meta tags for dark/light mode if needed */}
       </Head>
-      <body
-        className={`
-          ${geistSans.variable} ${geistMono.variable} ${light.settings} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} ${notoSansJP.variable} antialiased`}>
         {children}
       </body>
     </html>
