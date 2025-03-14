@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@uidotdev/usehooks": "^2.4.1",
     "lucide-react": "^0.476.0",
     "motion": "^12.4.7",
     "next": "15.1.7",

@@ -11,7 +11,7 @@ import { ChartNoAxesCombined, NotebookText, Settings, Upload } from "lucide-reac
 import { BigButton } from "@/app/components/baseui/BigButton"
 import { SmallButton } from "@/app/components/baseui/SmallButton"
 
-export default function NavBar() {
+export default function Footer() {
 
     return(
         <div className="flex justify-between items-center py-2 px-4 min-h-[60px] border border-b-gray-300">
@@ -20,21 +20,6 @@ export default function NavBar() {
         <NotebookText size={25} />
         <p className="text-lg font-semibold">SubsTracker</p>
       </span>
-
-      {/* Right Side: Buttons */}
-      <div className="flex items-center gap-4">
-        <BigButton
-          label={
-            <span className="flex items-center gap-2">
-              <Upload />
-              <span>Upload</span>
-            </span>
-          }
-          onClick={() => {}}
-        />
-        <SmallButton label={<Settings size={20} color="gray" />} onClick={() => {}} />
-        <SmallButton label={<ChartNoAxesCombined size={20} color="gray" />} onClick={() => {}} />
-      </div>
     </div>
         
     )
