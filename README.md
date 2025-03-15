@@ -5,3 +5,10 @@ Interfaces with the mpv extension [MPVacious](https://github.com/Ajatt-Tools/mpv
 
 The intended language this app supports is Japanese. Use this site in conjuction with [YomiTan](https://yomitan.wiki/) to easily look up the subtitles in the dictonary.
 
+## Highighted Tech
+
+**Client:** React, TailwindCSS
+
+**Server:** Node, Express
+
+**Libraries** [mecab-wasm](https://github.com/itayperl/mecab-wasm)
