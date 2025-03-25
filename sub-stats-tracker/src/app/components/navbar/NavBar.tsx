@@ -30,7 +30,9 @@ export default function NavBar() {
               <span>Upload</span>
             </span>
           }
-          onClick={() => {}}
+          onClick={() => {
+            
+          }}
         />
         <SmallButton label={<Settings size={20} color="gray" />} onClick={() => {}} />
         <SmallButton label={<ChartNoAxesCombined size={20} color="gray" />} onClick={() => {}} />

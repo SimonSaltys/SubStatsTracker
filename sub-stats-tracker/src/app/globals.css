@@ -6,22 +6,12 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  
 }
 
 .font-noto-sans-jp {
   font-family: var(--font-noto-sans-jp), sans-serif;
-  @apply text-2xl
+  @apply text-xl;
 }
-
-/* could use later */
-/* #root {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; 
-  align-items: center;
-} */
 
 * {
   box-sizing: border-box;
@@ -35,22 +25,17 @@ html.light {
   @apply bg-white text-AshGray;
 }
 
-.custom-handle-e {
-  @apply border-r border-gray-300;
-
+.custom-handle-w {
+  @apply border-r border-gray-300 hover:bg-gray-200 transition-colors;
   height: 100%;
   cursor: ew-resize;
   position: absolute;
-  right: 0;
+  left: 0;
   top: 0;
-}
-
-.custom-handle-e::before {
-  content: "";
-  position: absolute;
-  width: 12px; /* Expands the clickable area */
-  height: 100%;
-  left: -8px; /* Extends into the container */
-  cursor: ew-resize;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
 

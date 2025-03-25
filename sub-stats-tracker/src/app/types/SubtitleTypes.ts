@@ -10,6 +10,11 @@ export interface SubtitleHolderState {
     subtitles: string[]
 }
 
+export interface Time {
+  startTime : number 
+  currentTime : number
+}
+
 export const SubtitleHolderInitalData : SubtitleHolderState = {
     subtitles: []
 }
