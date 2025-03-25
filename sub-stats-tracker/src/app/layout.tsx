@@ -21,6 +21,9 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "Subtitle Text Tracker",
   description: "Created by Simon Saltikov",
+  icons: {
+    icon: "favicon.ico"
+  }
 };
 
 export default function RootLayout({

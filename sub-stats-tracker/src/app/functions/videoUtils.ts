@@ -22,57 +22,54 @@ export async function loadffmpeg(setFfmpeg : Dispatch<any>, setLoaded : Dispatch
       }
 }
 
-export async function handleConversion(ffmpeg : FFmpeg | null, setVideoSrc : Dispatch<string>) {
+
+export async function handleConversion(
+    ffmpeg: FFmpeg | null, 
+    setVideoSrc: Dispatch<string>
+) {
     try {
-          if (!ffmpeg) {
+        if (!ffmpeg) {
             console.error('FFmpeg is not loaded');
             return;
         }
 
-        const inputFileName = "BlueBox24JP.mkv"
-        const outputFileName = "output.mkv"
+        const inputFileName = "soloLeveling24.mkv"
+        const outputFileName = "output.mp4"
 
-        const inputFile = await fetchFile('/BlueBox24JP.mkv');
-
-        console.log('Writing input file...');
-
+        const inputFile = await fetchFile('/soloLeveling24.mkv');
         await ffmpeg.writeFile(inputFileName, inputFile);
 
-        const result = await ffmpeg.exec([
+        console.log('Executing FFmpeg conversion...');
+
+        /**
+         * todo split the video into segments and only convert that amount so it does not take over a minute to convert the whole video.
+         * todo (if a movie would be converted it would take over 10 minutes to convert)
+         */
+        await ffmpeg.exec([
           '-i', inputFileName,      // Input file
-          '-c:v', 'libx264',        // Video codec
-          '-preset', 'medium',      // Encoding preset
-          '-crf', '23',             // Constant Rate Factor
-          '-c:a', 'aac',            // Audio codec
-          '-b:a', '192k',           // Audio bitrate
+          // '-t', '180',           // Limit to first 60 seconds
+          '-c:v', 'copy',           // Copy video stream without re-encoding
+          '-c:a', 'aac',            // Re-encode audio to AAC (MP4-friendly)
           outputFileName            // Output file
-      ]);
-
-        console.log('FFmpeg exec result:', result);
-
-        console.log('Reading output file...');
-        // Read the converted file
-        const data = await ffmpeg.readFile(outputFileName);
-
-        console.log('Creating blob...');
-        // Create a blob and object URL
+        ]);
+        const data : any = await ffmpeg.readFile(outputFileName);
         const blob = new Blob([data], { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
-
-        console.log('Setting video source...');
-        // Set the video source
         setVideoSrc(url);
-    } catch(error) {
-      console.error('Detailed Conversion Error:', error);
+    } catch (error) {
+        console.error('Detailed Conversion Error:', error);
         
-      // More detailed error logging
-      if (error instanceof Error) {
-          console.error('Error Name:', error.name);
-          console.error('Error Message:', error.message);
-          console.error('Error Stack:', error.stack);
-      }
+        // More detailed error logging
+        if (error instanceof Error) {
+            console.error('Error Name:', error.name);
+            console.error('Error Message:', error.message);
+            console.error('Error Stack:', error.stack);
+        }
+
+        // Additional debug information
+        console.log('Checking FFmpeg instance...');
+        console.log('FFmpeg methods:', Object.keys(ffmpeg || {}));
     }
-  
 }
     
 

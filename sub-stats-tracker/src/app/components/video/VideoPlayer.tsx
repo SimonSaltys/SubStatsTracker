@@ -74,9 +74,9 @@ export default function VideoPlayer() {
 
     return (
         <>
-        <NoSSRWrapper><VideoConverter setVideoSrc={setVideoSrc}/></NoSSRWrapper>
-
-        <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
+        <VideoConverter setVideoSrc={setVideoSrc}/>
+        {
+            videoSrc === '' ? <div></div> :  <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
             <div className="relative w-full h-full flex justify-center items-center">
                 <video 
                     ref={videoRef}
@@ -126,6 +126,8 @@ export default function VideoPlayer() {
                 </div>
             </div>
         </div>
+        }
+       
     </>
     )
 }

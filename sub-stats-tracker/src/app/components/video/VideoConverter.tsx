@@ -3,28 +3,39 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { useEffect, useState } from 'react';
 import { handleConversion, loadffmpeg } from '@/app/functions/videoUtils';
 
-
 interface VideoConverterProps {
     setVideoSrc: (src: string) => void;
 }
 
 export default function VideoConverter({ setVideoSrc }: VideoConverterProps) {
-  const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
-  const [loaded, setLoaded] = useState(false);
+    const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
+    const [loaded, setLoaded] = useState(false);
+    const [isConverting, setIsConverting] = useState(false);
 
-      useEffect(() => {
-        loadffmpeg(setFfmpeg,setLoaded)
-      },[])
+    useEffect(() => {
+        loadffmpeg(setFfmpeg, setLoaded);
+    }, []);
 
-      useEffect(() => {
-        if (loaded && ffmpeg) {
-            handleConversion(ffmpeg, setVideoSrc);
+    const handleConvertClick = async () => {
+        if (loaded && ffmpeg && !isConverting) {
+            setIsConverting(true);
+            try {
+                await handleConversion(ffmpeg, setVideoSrc);
+            } catch (error) {
+                console.error('Conversion failed', error);
+            } finally {
+                setIsConverting(false);
+            }
         }
-    }, [loaded, ffmpeg, setVideoSrc]);
+    };
 
-           
-          return (
-            <>
-            </>
-          )
+    return (
+        <button 
+            onClick={handleConvertClick} 
+            disabled={!loaded || isConverting}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+        >
+            {isConverting ? 'Converting...' : 'Convert Video'}
+        </button>
+    );
 }
