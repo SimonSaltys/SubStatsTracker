@@ -5,7 +5,7 @@ import {useCallback, useContext, useEffect, useRef, useState} from "react"
 import SubTitleText from "@/app/components/subtitles/SubTitleText"
 import { readInSubtitleLine, useWindowDimensions } from "@/app/functions/subtitleUtils"
 import { SubtitleContext } from "../ClientWrapper"
-import { SubtitleContextData } from "@/app/types/subtitleTypes"
+import { SubtitleContextData } from "@/app/types/SubtitleTypes"
 import { ResizableBox } from "react-resizable"
 import { ChevronLeft } from "lucide-react";
 

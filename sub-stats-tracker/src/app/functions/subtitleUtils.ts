@@ -6,7 +6,7 @@
  */
 
 import { Dispatch, useLayoutEffect, useState, useEffect } from "react"
-import { SubtitleHolderState } from "@/app/types/subtitleTypes"
+import { SubtitleHolderState } from "@/app/types/SubtitleTypes"
 import { SubtitleHolderAction } from "./reducers/subtitleReducer"
 
 export async function readInSubtitleLine(state : SubtitleHolderState, dispatch : Dispatch<SubtitleHolderAction> ) {

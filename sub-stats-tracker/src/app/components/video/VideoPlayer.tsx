@@ -1,45 +1,56 @@
 "use client"
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useEffect, useContext} from 'react'
 import VideoConverter from './VideoConverter'
-import { segmentLength } from '@/app/functions/videoUtils'
+import { handleConversion, segmentLength } from '@/app/functions/videoUtils'
+import { VideoPlayerContextData} from '@/app/types/videoTypes'
+import { VideoPlayerContext } from '../ClientWrapper'
+
 
 export default function VideoPlayer() {
     const videoRef = useRef<HTMLVideoElement>(null)
-    const [videoSegments, setVideoSegments] = useState<string[]>([])
-    const [videoSrc, setVideoSrc] = useState('')
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [currentTime, setCurrentTime] = useState(0)
-    const [duration, setDuration] = useState(0)
-    const [volume, setVolume] = useState(1.0)
-
+    const context = useContext(VideoPlayerContext) as VideoPlayerContextData
+    const state = context.state;
+    const dispatch = context.dispatch;
+    
 
     useEffect(() => {
-
         // Set up event listeners when the component mounts
         const video = videoRef.current
         if (!video) return
-
         video.volume = 1.0
         video.muted = false
-        const updateTime = () => setCurrentTime(video.currentTime)
-        const updateDuration = () => setDuration(video.duration)
-        const handlePlay = () => setIsPlaying(true)
-        const handlePause = () => setIsPlaying(false)
+        const updateTime = () => dispatch({
+            type:"SET_CURRENT_TIME",
+            payload: video.currentTime
+        })
 
+        const handlePlay = () => dispatch({
+            type: "SET_IS_PLAYING",
+            payload: true
+        })
+
+        const handlePause = () => dispatch({
+            type: "SET_IS_PLAYING",
+            payload: false
+        })
         video.addEventListener('timeupdate', updateTime)
-        video.addEventListener('loadedmetadata', updateDuration)
         video.addEventListener('play', handlePlay)
         video.addEventListener('pause', handlePause)
 
-        setVideoSegments(Array(duration/segmentLength))
         return () => {
             video.removeEventListener('timeupdate', updateTime)
-            video.removeEventListener('loadedmetadata', updateDuration)
             video.removeEventListener('play', handlePlay)
             video.removeEventListener('pause', handlePause)
         }
-    },[])
+    },[videoRef.current])
+
+    useEffect(() => {
+            dispatch({
+                type:"INITIALIZE_VIDEO_SEGMENTS",
+                payload: new Array(Math.floor(state.videoLength / segmentLength)).fill(null)
+            })
+    }, [state.videoLength]);
 
     const togglePlayPause = () => {
         const video = videoRef.current
@@ -54,15 +65,29 @@ export default function VideoPlayer() {
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
-        setVolume(newVolume)
+
+        dispatch({
+            type:"SET_VOLUME",
+            payload: newVolume
+        })
+
         if (videoRef.current) {
             videoRef.current.volume = newVolume
         }
     }
 
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    async function handleSeek (e: React.ChangeEvent<HTMLInputElement>) {
         const seekTime = parseFloat(e.target.value)
-        setCurrentTime(seekTime)
+        dispatch({
+            type: "SET_CURRENT_TIME",
+            payload: seekTime
+        })
+
+        //TODO PICK UP
+        if(seekTime > state.videoSrc.segmentIndex * segmentLength) {
+            // await handleConversion(ffmpeg,)
+        }
+
         if (videoRef.current) {
             videoRef.current.currentTime = seekTime
         }
@@ -76,18 +101,13 @@ export default function VideoPlayer() {
 
     return (
         <>
-        <VideoConverter setVideoSrc={setVideoSrc} 
-                        currentTime={videoRef.current ? videoRef.current.currentTime : 0}
-                        videoLength={duration}
-                        videoSegments={videoSegments}
-                        setVideoSegments={setVideoSegments}
-                        />
+        <VideoConverter/>
         {
-            videoSrc === '' ? <div></div> :  <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
+            state.videoSrc.videoURL === '' ? <div></div> :  <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
             <div className="relative w-full h-full flex justify-center items-center">
                 <video 
                     ref={videoRef}
-                    src={videoSrc}
+                    src={state.videoSrc.videoURL}
                     className="max-w-full max-h-full"
                     onClick={togglePlayPause}
                     controls={false}
@@ -102,21 +122,21 @@ export default function VideoPlayer() {
                         onClick={togglePlayPause}
                         className="px-2 py-1 bg-blue-500 rounded"
                     >
-                        {isPlaying ? '⏸️' : '▶️'}
+                        {state.playing ? '⏸️' : '▶️'}
                     </button>
                     
-                    <span className="text-sm">{formatTime(currentTime)}</span>
+                    <span className="text-sm">{formatTime(state.currentTime)}</span>
                     
                     <input
                         type="range"
                         min="0"
-                        max={duration || 0}
-                        value={currentTime}
+                        max={state.videoLength || 0}
+                        value={state.currentTime}
                         onChange={handleSeek}
                         className="flex-grow h-2"
                     />
                     
-                    <span className="text-sm">{formatTime(duration)}</span>
+                    <span className="text-sm">{formatTime(state.videoLength)}</span>
                     
                     <div className="flex items-center space-x-1">
                         <span className="text-sm">🔊</span>
@@ -125,7 +145,7 @@ export default function VideoPlayer() {
                             min="0"
                             max="1"
                             step="0.01"
-                            value={volume}
+                            value={state.volume}
                             onChange={handleVolumeChange}
                             className="w-20 h-2"
                         />

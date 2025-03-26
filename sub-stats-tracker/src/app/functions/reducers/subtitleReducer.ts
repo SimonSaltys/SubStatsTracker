@@ -4,7 +4,7 @@
  * Holds the reducers for subtitle componenents
  * 
  */
-import { SubtitleHolderState } from "@/app/types/subtitleTypes";
+import { SubtitleHolderState } from "@/app/types/SubtitleTypes";
 
 export type SubtitleHolderAction = 
  | { type: "ADD_SUBTITLE"; payload: string }

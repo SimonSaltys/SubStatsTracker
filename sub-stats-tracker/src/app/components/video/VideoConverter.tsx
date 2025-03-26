@@ -1,36 +1,37 @@
 "use client"
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {useEffect, useContext} from 'react';
 import { handleConversion, loadffmpeg } from '@/app/functions/videoUtils';
+import { VideoPlayerContextData, VideoSource } from '@/app/types/videoTypes';
+import { VideoPlayerContext } from '../ClientWrapper';
 
-export interface VideoConverterProps {
-    setVideoSrc: (src: string) => void,
-    setVideoSegments : Dispatch<SetStateAction<string[]>>,
-    videoSegments : string[],
-    currentTime : number,
-    videoLength : number
-}
 
-export default function VideoConverter(props : VideoConverterProps) {
-    const {currentTime, videoLength, videoSegments, setVideoSegments, setVideoSrc} = props
-    const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
-    const [loaded, setLoaded] = useState(false);
-    const [isConverting, setIsConverting] = useState(false);
+export default function VideoConverter() {
+        const context = useContext(VideoPlayerContext) as VideoPlayerContextData
+        const state = context.state;
+        const dispatch = context.dispatch;
 
     useEffect(() => {
-        loadffmpeg(setFfmpeg, setLoaded);
+        loadffmpeg(dispatch);
     }, []);
 
     const handleConvertClick = async () => {
-        if (loaded && ffmpeg !== null && !isConverting) {
-            setIsConverting(true);
+        if (state.loaded && state.ffmpeg !== null && !state.isConverting) {
+            dispatch({
+                type: "SET_IS_CONVERTING",
+                payload: true
+            })
+
             try {
-                if(videoSegments.length === 0) 
-                    await handleConversion(ffmpeg,props)
+
+                if(state.videoSegments.length === 0) 
+                    await handleConversion(state, dispatch)
             } catch (error) {
                 console.error('Conversion failed', error);
             } finally {
-                setIsConverting(false);
+               dispatch({
+                type: "SET_IS_CONVERTING",
+                payload: false
+            })
             }
         }
     };
@@ -38,10 +39,10 @@ export default function VideoConverter(props : VideoConverterProps) {
     return (
         <button 
             onClick={handleConvertClick} 
-            disabled={!loaded || isConverting}
+            disabled={!state.loaded || state.isConverting}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
         >
-            {isConverting ? 'Converting...' : 'Convert Video'}
+            {state.isConverting ? 'Converting...' : 'Convert Video'}
         </button>
     );
 }

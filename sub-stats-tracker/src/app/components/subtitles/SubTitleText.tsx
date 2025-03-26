@@ -10,7 +10,7 @@
 
 import { useContext } from "react";
 import { Delete } from "lucide-react";
-import { SubtitleContextData } from "@/app/types/subtitleTypes";
+import { SubtitleContextData } from "@/app/types/SubtitleTypes";
 import { SubtitleContext } from "@/app/components/ClientWrapper";
 
 export default function SubTitleText(props : {text : String, id: number }) {
