@@ -7,7 +7,6 @@ export interface VideoConverterProps {
     setVideoSrc: (src: string) => void,
     setVideoSegments : Dispatch<SetStateAction<string[]>>,
     videoSegments : string[],
-    segmentLength : number,
     currentTime : number,
     videoLength : number
 }
@@ -23,32 +22,11 @@ export default function VideoConverter(props : VideoConverterProps) {
     }, []);
 
     const handleConvertClick = async () => {
-        if (loaded && ffmpeg && !isConverting) {
+        if (loaded && ffmpeg !== null && !isConverting) {
             setIsConverting(true);
             try {
-
-                const currentMinute = currentTime / 60
-
-
-
-
-
-
-                for(let i = 0; i < videoSegments.length; i++) {
-                  if(videoSegments[i] === null) {
-                    const nextSegment = await handleConversion(ffmpeg,props)
-                    setVideoSegments(
-                        [
-                            ...videoSegments.slice(0,i),
-                            nextSegment,
-                            ...videoSegments.slice(i)
-                        ]
-                    )
-                  }
-        
-        
-        
-                }
+                if(videoSegments.length === 0) 
+                    await handleConversion(ffmpeg,props)
             } catch (error) {
                 console.error('Conversion failed', error);
             } finally {

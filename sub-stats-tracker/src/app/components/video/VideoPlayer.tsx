@@ -2,10 +2,9 @@
 
 import { useRef, useState, useEffect } from 'react'
 import VideoConverter from './VideoConverter'
-import NoSSRWrapper from '../utility/NoSSRWrapper'
+import { segmentLength } from '@/app/functions/videoUtils'
 
 export default function VideoPlayer() {
-    const segmentLength = 300
     const videoRef = useRef<HTMLVideoElement>(null)
     const [videoSegments, setVideoSegments] = useState<string[]>([])
     const [videoSrc, setVideoSrc] = useState('')
@@ -16,13 +15,13 @@ export default function VideoPlayer() {
 
 
     useEffect(() => {
+
         // Set up event listeners when the component mounts
         const video = videoRef.current
         if (!video) return
 
         video.volume = 1.0
         video.muted = false
-        
         const updateTime = () => setCurrentTime(video.currentTime)
         const updateDuration = () => setDuration(video.duration)
         const handlePlay = () => setIsPlaying(true)
@@ -33,17 +32,14 @@ export default function VideoPlayer() {
         video.addEventListener('play', handlePlay)
         video.addEventListener('pause', handlePause)
 
-        const durationInMinutes = duration / 60
-        const segmentLengthInMinutes = segmentLength / 60
-
-        setVideoSegments(Array(durationInMinutes/segmentLengthInMinutes))
+        setVideoSegments(Array(duration/segmentLength))
         return () => {
             video.removeEventListener('timeupdate', updateTime)
             video.removeEventListener('loadedmetadata', updateDuration)
             video.removeEventListener('play', handlePlay)
             video.removeEventListener('pause', handlePause)
         }
-    })
+    },[])
 
     const togglePlayPause = () => {
         const video = videoRef.current
