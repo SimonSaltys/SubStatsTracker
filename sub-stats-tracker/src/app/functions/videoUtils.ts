@@ -1,6 +1,7 @@
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { Dispatch } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { VideoConverterProps } from "../components/video/VideoConverter";
 
 export async function loadffmpeg(setFfmpeg : Dispatch<any>, setLoaded : Dispatch<boolean>) {
     try{
@@ -25,18 +26,28 @@ export async function loadffmpeg(setFfmpeg : Dispatch<any>, setLoaded : Dispatch
 
 export async function handleConversion(
     ffmpeg: FFmpeg | null, 
-    setVideoSrc: Dispatch<string>
+    props : VideoConverterProps
 ) {
     try {
         if (!ffmpeg) {
             console.error('FFmpeg is not loaded');
-            return;
+            return '';
         }
 
-        const inputFileName = "soloLeveling24.mkv"
-        const outputFileName = "output.mp4"
+      
 
-        const inputFile = await fetchFile('/soloLeveling24.mkv');
+
+
+
+
+
+
+
+
+
+        const inputFileName = "S01E03.mkv"
+        const outputFileName = "output.mp4"
+        const inputFile = await fetchFile('/S01E03.mkv');
         await ffmpeg.writeFile(inputFileName, inputFile);
 
         console.log('Executing FFmpeg conversion...');
@@ -47,7 +58,7 @@ export async function handleConversion(
          */
         await ffmpeg.exec([
           '-i', inputFileName,      // Input file
-          // '-t', '180',           // Limit to first 60 seconds
+          '-t', '60',               // Limit to first 60 seconds
           '-c:v', 'copy',           // Copy video stream without re-encoding
           '-c:a', 'aac',            // Re-encode audio to AAC (MP4-friendly)
           outputFileName            // Output file
@@ -55,7 +66,7 @@ export async function handleConversion(
         const data : any = await ffmpeg.readFile(outputFileName);
         const blob = new Blob([data], { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
-        setVideoSrc(url);
+        return url
     } catch (error) {
         console.error('Detailed Conversion Error:', error);
         
@@ -69,6 +80,7 @@ export async function handleConversion(
         // Additional debug information
         console.log('Checking FFmpeg instance...');
         console.log('FFmpeg methods:', Object.keys(ffmpeg || {}));
+        return ''
     }
 }
     

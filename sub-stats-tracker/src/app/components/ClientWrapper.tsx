@@ -13,7 +13,6 @@ import NavBar from "@/app/components/navbar/NavBar"
 import { ThemeProvider } from "next-themes"
 import { useMounted } from "@/app/functions/subtitleUtils"
 import VideoPlayer from "@/app/components/video/VideoPlayer"
-import { Test } from "@/app/components/utility/Test"
 
 
 export const SubtitleContext = createContext<SubtitleContextData | ''>('')

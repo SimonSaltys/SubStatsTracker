@@ -5,7 +5,9 @@ import VideoConverter from './VideoConverter'
 import NoSSRWrapper from '../utility/NoSSRWrapper'
 
 export default function VideoPlayer() {
+    const segmentLength = 300
     const videoRef = useRef<HTMLVideoElement>(null)
+    const [videoSegments, setVideoSegments] = useState<string[]>([])
     const [videoSrc, setVideoSrc] = useState('')
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
@@ -31,6 +33,10 @@ export default function VideoPlayer() {
         video.addEventListener('play', handlePlay)
         video.addEventListener('pause', handlePause)
 
+        const durationInMinutes = duration / 60
+        const segmentLengthInMinutes = segmentLength / 60
+
+        setVideoSegments(Array(durationInMinutes/segmentLengthInMinutes))
         return () => {
             video.removeEventListener('timeupdate', updateTime)
             video.removeEventListener('loadedmetadata', updateDuration)
@@ -74,7 +80,12 @@ export default function VideoPlayer() {
 
     return (
         <>
-        <VideoConverter setVideoSrc={setVideoSrc}/>
+        <VideoConverter setVideoSrc={setVideoSrc} 
+                        currentTime={videoRef.current ? videoRef.current.currentTime : 0}
+                        videoLength={duration}
+                        videoSegments={videoSegments}
+                        setVideoSegments={setVideoSegments}
+                        />
         {
             videoSrc === '' ? <div></div> :  <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
             <div className="relative w-full h-full flex justify-center items-center">

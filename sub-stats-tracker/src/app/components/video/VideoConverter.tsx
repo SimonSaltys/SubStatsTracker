@@ -1,13 +1,19 @@
 "use client"
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { handleConversion, loadffmpeg } from '@/app/functions/videoUtils';
 
-interface VideoConverterProps {
-    setVideoSrc: (src: string) => void;
+export interface VideoConverterProps {
+    setVideoSrc: (src: string) => void,
+    setVideoSegments : Dispatch<SetStateAction<string[]>>,
+    videoSegments : string[],
+    segmentLength : number,
+    currentTime : number,
+    videoLength : number
 }
 
-export default function VideoConverter({ setVideoSrc }: VideoConverterProps) {
+export default function VideoConverter(props : VideoConverterProps) {
+    const {currentTime, videoLength, videoSegments, setVideoSegments, setVideoSrc} = props
     const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
     const [loaded, setLoaded] = useState(false);
     const [isConverting, setIsConverting] = useState(false);
@@ -20,7 +26,29 @@ export default function VideoConverter({ setVideoSrc }: VideoConverterProps) {
         if (loaded && ffmpeg && !isConverting) {
             setIsConverting(true);
             try {
-                await handleConversion(ffmpeg, setVideoSrc);
+
+                const currentMinute = currentTime / 60
+
+
+
+
+
+
+                for(let i = 0; i < videoSegments.length; i++) {
+                  if(videoSegments[i] === null) {
+                    const nextSegment = await handleConversion(ffmpeg,props)
+                    setVideoSegments(
+                        [
+                            ...videoSegments.slice(0,i),
+                            nextSegment,
+                            ...videoSegments.slice(i)
+                        ]
+                    )
+                  }
+        
+        
+        
+                }
             } catch (error) {
                 console.error('Conversion failed', error);
             } finally {
