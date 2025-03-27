@@ -1,6 +1,6 @@
 "use client"
 import {useEffect, useContext} from 'react';
-import { handleConversion, loadffmpeg } from '@/app/functions/videoUtils';
+import { handleConversion, loadffmpeg, segmentLength } from '@/app/functions/videoUtils';
 import { VideoPlayerContextData, VideoSource } from '@/app/types/videoTypes';
 import { VideoPlayerContext } from '../ClientWrapper';
 
@@ -22,9 +22,10 @@ export default function VideoConverter() {
             })
 
             try {
-
-                if(state.videoSegments.length === 0) 
+                //start the video if it is the first time playing
+                if(state.videoSegments.length === 0) {
                     await handleConversion(state, dispatch)
+                }
             } catch (error) {
                 console.error('Conversion failed', error);
             } finally {

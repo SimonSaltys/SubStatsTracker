@@ -12,7 +12,7 @@ export type VideoPlayerAction =
 | {type: "SET_SOURCE"; payload: VideoSource}
 | {type: "ADD_VIDEO_SEGMENT"; payload: VideoSource}
 | {type: "INITIALIZE_VIDEO_SEGMENTS"; payload: string[]}
-
+| {type: "SET_SEEKED_TIME"; payload: number}
 
 
 export default function VideoPlayerStateReducer(
@@ -62,10 +62,11 @@ export default function VideoPlayerStateReducer(
             };
         case "ADD_VIDEO_SEGMENT":
             const videoSrcToAdd = action.payload;
+            console.log("got src", videoSrcToAdd)
             const updatedSegments = [
                 ...state.videoSegments.slice(0, videoSrcToAdd.segmentIndex),
                 videoSrcToAdd.videoURL, 
-                ...state.videoSegments.slice(videoSrcToAdd.segmentIndex),
+                ...state.videoSegments.slice(videoSrcToAdd.segmentIndex + 1),
             ];
             return {
                 ...state,
@@ -76,6 +77,12 @@ export default function VideoPlayerStateReducer(
                 ...state,
                 videoSegments: action.payload
             }
+        case "SET_SEEKED_TIME":
+            return {
+                ...state,
+                seekedTime: action.payload
+            }
+
         
     }
 

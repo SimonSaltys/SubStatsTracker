@@ -7,7 +7,7 @@
 "use client"
 import SubTitleWrapper from "@/app/components/subtitles/SubTitleWrapper"
 import { createContext, useReducer} from "react"
-import { SubtitleHolderInitalData, SubtitleContextData  } from "@/app/types/SubtitleTypes"
+import { SubtitleHolderInitalData, SubtitleContextData  } from "@/app/types/subtitleTypes"
 import SubTitleStateReducer from "@/app/functions/reducers/subtitleReducer"
 import NavBar from "@/app/components/navbar/NavBar"
 import { ThemeProvider } from "next-themes"

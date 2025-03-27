@@ -4,7 +4,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { VideoPlayerAction } from "./reducers/videoReducer";
 import { VideoPlayerState, VideoSource } from "../types/videoTypes";
 
-export const segmentLength = 10;
+export const segmentLength = 60;
 
 export async function loadffmpeg(dispatch : Dispatch<VideoPlayerAction>) {
     try{
@@ -33,7 +33,7 @@ export async function loadffmpeg(dispatch : Dispatch<VideoPlayerAction>) {
 }
 
 export async function handleConversion(state : VideoPlayerState, dispatch : Dispatch<VideoPlayerAction>) {
-  const {currentTime, videoSegments,videoLength, ffmpeg} = state
+  const {currentTime, videoSegments,videoLength, ffmpeg, seekedTime} = state
 
     try {
 
@@ -47,12 +47,31 @@ export async function handleConversion(state : VideoPlayerState, dispatch : Disp
           return
         }
 
-        const videoSegmentIndex = findSegmentIndex(currentTime, videoSegments)
+        let videoTime = currentTime
+        if(seekedTime !== -1){
+          videoTime = seekedTime
+          dispatch({
+            type:"SET_SEEKED_TIME",
+            payload:-1
+          })
+        }
+
+        const videoSegmentIndex = findSegmentIndex(videoTime, videoSegments)
         const videoSegmentURL = videoSegments[videoSegmentIndex]
 
-        //if the segment exists don't re convert it
-        if(videoSegmentURL !== undefined)
+        console.log("Checking Segment", videoSegmentIndex)
+
+
+        if(videoSegmentURL) {
+          console.log("In this bucket the url is", videoSegmentURL)
+          dispatch({
+            type:"SET_SOURCE",
+            payload: {videoURL: videoSegmentURL, segmentIndex: videoSegmentIndex}
+          })
           return
+        }
+         
+          
 
         const inputFileName = "S01E03.mkv"
         const outputFileName = "output" + videoSegmentIndex + ".mp4"
@@ -69,7 +88,7 @@ export async function handleConversion(state : VideoPlayerState, dispatch : Disp
       }
 
         //Starting the conversion
-        const inputFile = await fetchFile('/S01E03.mkv');
+        const inputFile = await fetchFile('/BlueBox24JP.mkv');
         await ffmpeg.writeFile(inputFileName, inputFile);
 
         console.log('Executing FFmpeg conversion...');
@@ -93,7 +112,11 @@ export async function handleConversion(state : VideoPlayerState, dispatch : Disp
           payload: {videoURL : url, segmentIndex : videoSegmentIndex}
         })
 
-        console.log("Updated Segments in Reducer:", state.videoSegments);
+        dispatch({
+          type:"SET_SOURCE",
+          payload: {videoURL : url, segmentIndex : videoSegmentIndex}
+        })
+
       } catch (error) {
         console.error('Detailed Conversion Error:', error);
     }
@@ -101,14 +124,14 @@ export async function handleConversion(state : VideoPlayerState, dispatch : Disp
 
 //private functions below
 
-function findSegmentIndex(currentTime : number, videoSegments : string[]) {
+export function findSegmentIndex(currentTime : number, videoSegments : string[]) {
   const index = Math.floor(currentTime/segmentLength);
   return index < videoSegments.length ? index : videoSegments.length;
 }
 
 async function getVideoDuration(ffmpeg : FFmpeg, inputFileName : string): Promise<number> {
   try{
-        const inputFile = await fetchFile('/S01E03.mkv');
+        const inputFile = await fetchFile('/BlueBox24JP.mkv');
         await ffmpeg.writeFile(inputFileName, inputFile);
         await ffmpeg.ffprobe([
           "-v", "error", //print only errors

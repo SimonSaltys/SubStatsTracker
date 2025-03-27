@@ -17,6 +17,7 @@ export interface VideoPlayerState {
     playing : boolean
     loaded : boolean,
     isConverting: boolean,
+    seekedTime : number
 }
 
 export const VideoPlayerInitialData : VideoPlayerState = {
@@ -28,7 +29,8 @@ export const VideoPlayerInitialData : VideoPlayerState = {
     videoLength: 0,
     playing: false,
     loaded : false,
-    isConverting: false
+    isConverting: false,
+    seekedTime: -1
 }
 
 export interface VideoPlayerContextData {
