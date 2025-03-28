@@ -1,17 +1,70 @@
 "use client"
 
-import { useRef, useEffect, useContext} from 'react'
+import { useRef, useEffect, useContext, useState} from 'react'
 import VideoConverter from './VideoConverter'
-import { handleConversion, segmentLength } from '@/app/functions/videoUtils'
-import { VideoPlayerContextData} from '@/app/types/videoTypes'
+import { findSegmentIndex, loadSegment, segmentLength } from '@/app/functions/videoUtils'
+import { VideoPlayerContextData, VideoSource} from '@/app/types/videoTypes'
 import { VideoPlayerContext } from '../ClientWrapper'
 
 
 export default function VideoPlayer() {
     const videoRef = useRef<HTMLVideoElement>(null)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [videoSrc, setVideoSrc] = useState<VideoSource>({videoURL : '', segmentIndex: 0})
     const context = useContext(VideoPlayerContext) as VideoPlayerContextData
     const state = context.state;
     const dispatch = context.dispatch;
+
+ 
+    useEffect(() => {
+        async function handleConversion() {           
+            console.log("Current Segments", state.videoSegments) 
+            if(state.videoSegments[0] && !state.loaded) {
+                setVideoSrc({videoURL: state.videoSegments[0], segmentIndex: 0})
+                setCurrentTime(() => 0)
+                dispatch({
+                    type:"SET_LOADED",
+                    payload: true
+                })
+                console.log("Initializing") 
+                return
+            }
+        }
+
+        handleConversion()
+   },[state.videoSegments, state.loaded])
+
+   useEffect(() => {
+       // Calculate the seek offset within the current segment
+       const handleSeekSafely = async () => { 
+            const currentSegmentIndex = findSegmentIndex(state.seekedTime, state.videoSegments)
+            const seekOffset = state.seekedTime - (currentSegmentIndex * segmentLength)
+    
+            if(currentSegmentIndex != videoSrc.segmentIndex) {
+                if(!state.videoSegments[currentSegmentIndex]) 
+                    await loadSegment(state, dispatch, currentSegmentIndex)
+
+                // Update video source after potential segment loading
+                setVideoSrc(prev => ({
+                    videoURL: state.videoSegments[currentSegmentIndex] || prev.videoURL, 
+                    segmentIndex: currentSegmentIndex
+                }))
+                return 
+            }
+
+            // Safely set current time
+            if (videoRef.current) {
+                try {
+                        videoRef.current!.currentTime = seekOffset
+                        videoRef.current!.play()
+                } catch (error) {
+                    console.error("Seek error:", error)
+                }
+            }
+       }
+
+       handleSeekSafely()
+   },[state.seekedTime, state.videoSegments, videoSrc.segmentIndex])
 
     useEffect(() => {
         // Set up event listeners when the component mounts
@@ -54,7 +107,10 @@ export default function VideoPlayer() {
 
     async function handleSeek (e: React.ChangeEvent<HTMLInputElement>) {
         const seekTime = parseFloat(e.target.value)
-        await handleConversion(state,dispatch,seekTime)
+        dispatch({
+            type: "SET_SEEKED_TIME",
+            payload: seekTime
+        })
     }
 
     const formatTime = (timeInSeconds: number) => {
@@ -67,11 +123,11 @@ export default function VideoPlayer() {
         <>
         <VideoConverter/>
         {
-            state.videoSrc.videoURL === '' ? <div></div> :  <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
+            videoSrc.videoURL === '' ? <div></div> :  <div className="relative w-4/5 h-4/5 flex flex-col justify-center items-center text-xl border border-red-600">
             <div className="relative w-full h-full flex justify-center items-center">
                 <video 
                     ref={videoRef}
-                    src={state.videoSrc.videoURL}
+                    src={videoSrc.videoURL}
                     className="max-w-full max-h-full"
                     onClick={togglePlayPause}
                     controls={false}
@@ -84,6 +140,7 @@ export default function VideoPlayer() {
                         type:"SET_IS_PLAYING",
                         payload: true
                     })}
+                    onTimeUpdate={() => setCurrentTime(videoRef.current ? videoRef.current.currentTime : 0)}
                 >
                 </video>
             </div>
@@ -97,13 +154,13 @@ export default function VideoPlayer() {
                         {state.playing ? '⏸️' : '▶️'}
                     </button>
                     
-                    <span className="text-sm">{formatTime((state.videoRef ? state.videoRef.currentTime : 0) + (state.videoSrc.segmentIndex * segmentLength))}</span>
+                    <span className="text-sm">{formatTime((videoRef.current ? videoRef.current.currentTime : 0) + (videoSrc.segmentIndex * segmentLength))}</span>
                     
                     <input
                         type="range"
                         min="0"
                         max={state.videoLength || 0}
-                        value={state.videoRef ? state.videoRef.currentTime : 0}
+                        value={(videoRef.current ? videoRef.current.currentTime : 0) + (videoSrc.segmentIndex * segmentLength)}
                         onChange={handleSeek}
                         className="flex-grow h-2"
                     />

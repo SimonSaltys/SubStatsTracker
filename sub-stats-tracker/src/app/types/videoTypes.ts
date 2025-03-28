@@ -9,26 +9,26 @@ export interface VideoSource {
 
 export interface VideoPlayerState {
     ffmpeg : FFmpeg | null,
-    videoSrc : VideoSource
-    videoRef : HTMLVideoElement | null
     videoSegments : string[],
     volume : number,
     videoLength: number,
-    playing : boolean
+    playing : boolean,
     loaded : boolean,
     isConverting: boolean,
+    seekedTime : number,
+    nextSegment : VideoSource
 }
 
 export const VideoPlayerInitialData : VideoPlayerState = {
     ffmpeg : null,
-    videoSrc : {videoURL : '', segmentIndex: 0},
-    videoRef : null,
     videoSegments : [],
     volume : 1,
     videoLength: 0,
     playing: false,
     loaded : false,
     isConverting: false,
+    seekedTime: 0,
+    nextSegment: {videoURL : '', segmentIndex: 0}
 }
 
 export interface VideoPlayerContextData {

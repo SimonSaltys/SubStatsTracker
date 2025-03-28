@@ -6,7 +6,7 @@ import { VideoPlayerState } from "../types/videoTypes";
 
 export const segmentLength = 300;
 
-export async function loadffmpeg(dispatch : Dispatch<VideoPlayerAction>) {
+export async function loadffmpeg() : Promise<FFmpeg | null> {
     try{
         console.log("Attempting Load")
         const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
@@ -18,138 +18,84 @@ export async function loadffmpeg(dispatch : Dispatch<VideoPlayerAction>) {
           wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
         });
         
-        dispatch({
-          type:"SET_FFMPEG",
-          payload: ffmpegInstance
-        })
-        dispatch({
-          type: "SET_LOADED",
-          payload: true
-        })
+        return ffmpegInstance
 
       }  catch (error) {
         console.error("Failed to load FFmpeg:", error);
+        return null
       }
 }
 
-export async function handleConversion(state : VideoPlayerState, dispatch : Dispatch<VideoPlayerAction>, seekedTime : number) {
-  const {videoRef, videoSegments,videoLength, ffmpeg} = state
-
-    try {
-        const video = videoRef
-
-        if (!ffmpeg) {
-            console.error('FFmpeg is not loaded')
-            return
-        }
-
-        if(seekedTime > videoLength) {
-          console.error('Cannot load a segment over the video length')
-          return
-        }
-
-        let videoTime = 0
-
-        if(video) {
-          videoTime = video.currentTime
-
-          if(seekedTime !== -1){
-            videoTime = seekedTime
-            dispatch({
-              type:"SET_SEEKED_TIME",
-              payload:-1
-            })
-          }
-        }
-       
-
-        const videoSegmentIndex = findSegmentIndex(videoTime, videoSegments)
-        const videoSegmentURL = videoSegments[videoSegmentIndex]
-
-        console.log("Checking Segment", videoSegmentIndex)
-
-
-        if(videoSegmentURL) {
-          console.log("In this bucket the url is", videoSegmentURL)
-
-          if(state.videoSrc.videoURL === videoSegmentURL) {
-              dispatch({
-                type: "SET_SEEKED_TIME",
-                payload: seekedTime
-            })
-            console.log("Setting seeked time", seekedTime)
-          } else {
-            dispatch({
-              type:"SET_SOURCE",
-              payload: {videoURL: videoSegmentURL, segmentIndex: videoSegmentIndex}
-            })
-          }
-          return
-        }
-        const inputFileName = "S01E03.mkv"
-        const outputFileName = "output" + videoSegmentIndex + ".mp4"
-
-        //Getting the video length if it has not been set yet
-        if (videoLength === 0) {
-          const fullDuration = await getVideoDuration(ffmpeg, inputFileName)
-          console.log('Full Video Duration:', fullDuration);
-
-          dispatch({
-            type:"SET_VIDEO_LENGTH",
-            payload: fullDuration
-          })
-      }
-
-        //Starting the conversion
-        const inputFile = await fetchFile('/BlueBox24JP.mkv');
-        await ffmpeg.writeFile(inputFileName, inputFile);
-
-        console.log('Executing FFmpeg conversion...');
-        await ffmpeg.exec([
-          '-i', inputFileName,                              // Input file
-          '-ss', `${videoSegmentIndex*segmentLength}`,      // Start of the segment
-          '-to',  `${(videoSegmentIndex + 1) * segmentLength - 1}`, // End of the segment
-          '-c:v', 'copy',                                   // Copy video stream without re-encoding
-          '-c:a', 'aac',                                    // Re-encode audio to AAC (MP4-friendly)
-          outputFileName                                    // Output file
-        ]);
-        console.log("Done")
-
-        //Creating the url to play
-        const data : any = await ffmpeg.readFile(outputFileName);
-        const blob = new Blob([data], { type: 'video/mp4' });
-        const url = URL.createObjectURL(blob);
-
-        dispatch({
-          type: "ADD_VIDEO_SEGMENT",
-          payload: {videoURL : url, segmentIndex : videoSegmentIndex}
-        })
-
-        dispatch({
-          type:"SET_SOURCE",
-          payload: {videoURL : url, segmentIndex : videoSegmentIndex}
-        })
-
-      } catch (error) {
-        console.error('Detailed Conversion Error:', error);
-    }
-}
 
 //private functions below
+export async function loadSegment(
+  state : VideoPlayerState, 
+  dispatch : Dispatch<VideoPlayerAction>, 
+  videoSegmentIndex: number ) {
+    try {
 
-function loadSegment(state ) {
+      let ffmpeg = state.ffmpeg
+      if(!ffmpeg) {
+         ffmpeg = await loadffmpeg()
+      }
 
+      if(!ffmpeg)
+        return
+
+      dispatch({
+        type:"SET_FFMPEG",
+        payload: ffmpeg
+      })
+
+      if(state.videoLength === 0) {
+        const videoDuration = await getVideoDuration(dispatch,ffmpeg,"S01E03.mkv")
+        console.log("Set duration to ",videoDuration)
+
+        dispatch({
+          type: "SET_VIDEO_LENGTH",
+          payload: videoDuration
+        })
+      }
+     
+      const inputFileName = "S01E03.mkv"
+      const outputFileName = "output" + videoSegmentIndex + ".mp4"
+      const inputFile = await fetchFile('/S01E03.mkv');
+      await ffmpeg.writeFile(inputFileName, inputFile);
+  
+      console.log('Executing FFmpeg conversion...');
+      await ffmpeg.exec([
+        '-i', inputFileName,                              // Input file
+        '-ss', `${videoSegmentIndex*segmentLength}`,      // Start of the segment
+        '-to',  `${(videoSegmentIndex + 1) * segmentLength - 1}`, // End of the segment
+        '-c:v', 'copy',                                   // Copy video stream without re-encoding
+        '-c:a', 'aac',                                    // Re-encode audio to AAC (MP4-friendly)
+        outputFileName                                    // Output file
+      ]);
+      console.log("Done")
+  
+      //Creating the url to play
+      const data : any = await ffmpeg.readFile(outputFileName);
+      const blob = new Blob([data], { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+      dispatch({
+        type: "ADD_VIDEO_SEGMENT",
+        payload: {videoURL : url, segmentIndex : videoSegmentIndex}
+      })
+    } catch (error) {
+      console.error('Detailed Conversion Error:', error);
+  }
+   
 }
 
 
-function findSegmentIndex(currentTime : number, videoSegments : string[]) {
+export function findSegmentIndex(currentTime : number, videoSegments : string[]) {
   const index = Math.floor(currentTime/segmentLength);
   return index < videoSegments.length ? index : videoSegments.length;
 }
 
-async function getVideoDuration(ffmpeg : FFmpeg, inputFileName : string): Promise<number> {
+export async function getVideoDuration(dispatch : Dispatch<VideoPlayerAction>, ffmpeg : FFmpeg, inputFileName : string) : Promise<number> {
   try{
-        const inputFile = await fetchFile('/BlueBox24JP.mkv');
+        const inputFile = await fetchFile('/S01E03.mkv');
         await ffmpeg.writeFile(inputFileName, inputFile);
         await ffmpeg.ffprobe([
           "-v", "error", //print only errors
@@ -163,12 +109,12 @@ async function getVideoDuration(ffmpeg : FFmpeg, inputFileName : string): Promis
         const durationString = new TextDecoder().decode(data).trim();
         
         const duration = parseFloat(durationString);
-
-        return isNaN(duration) ? 0 : duration;
-
+        console.log("Got video duration of",duration)
+      
+        return isNaN(duration) ? 0 : duration
       } catch (error) {
         console.error('Error getting video duration:', error);
-        return 0;
+        return 0
     }
 }
     
