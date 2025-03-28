@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useContext} from 'react'
 import VideoConverter from './VideoConverter'
-import { findSegmentIndex, handleConversion, segmentLength } from '@/app/functions/videoUtils'
+import { handleConversion, segmentLength } from '@/app/functions/videoUtils'
 import { VideoPlayerContextData} from '@/app/types/videoTypes'
 import { VideoPlayerContext } from '../ClientWrapper'
 
@@ -52,32 +52,9 @@ export default function VideoPlayer() {
         }
     }
 
-    useEffect(() => {
-        if(!state.ffmpeg)
-            return
-
-        console.log("changing")
-        console.log("Setting time", state.seekedTime)
-
-    //todo some wierd stuff going on here
-    //     async function onSeek() {
-    //         //If the seek time is greater than the segment lets run the convert
-    //            console.log("Handeling conversion")
-    //            await handleConversion(state, dispatch)
-    //    }
-
-    //    if(state.seekedTime > (state.videoSrc.segmentIndex + 1) * segmentLength ||
-    //       state.seekedTime > (state.videoSrc.segmentIndex - 1) * segmentLength) {
-    //        onSeek()
-    //    }
-    },[state.seekedTime])
-
     async function handleSeek (e: React.ChangeEvent<HTMLInputElement>) {
         const seekTime = parseFloat(e.target.value)
-        dispatch({
-            type: "SET_SEEKED_TIME",
-            payload: seekTime
-        })
+        await handleConversion(state,dispatch,seekTime)
     }
 
     const formatTime = (timeInSeconds: number) => {
@@ -107,10 +84,6 @@ export default function VideoPlayer() {
                         type:"SET_IS_PLAYING",
                         payload: true
                     })}
-                    onTimeUpdate={() => dispatch({
-                        type:"SET_CURRENT_TIME",
-                        payload: videoRef.current ? videoRef.current.currentTime : 0
-                    })}
                 >
                 </video>
             </div>
@@ -124,13 +97,13 @@ export default function VideoPlayer() {
                         {state.playing ? '⏸️' : '▶️'}
                     </button>
                     
-                    <span className="text-sm">{formatTime(state.currentTime + (state.videoSrc.segmentIndex * segmentLength))}</span>
+                    <span className="text-sm">{formatTime((state.videoRef ? state.videoRef.currentTime : 0) + (state.videoSrc.segmentIndex * segmentLength))}</span>
                     
                     <input
                         type="range"
                         min="0"
                         max={state.videoLength || 0}
-                        value={state.currentTime + (state.videoSrc.segmentIndex * segmentLength)}
+                        value={state.videoRef ? state.videoRef.currentTime : 0}
                         onChange={handleSeek}
                         className="flex-grow h-2"
                     />

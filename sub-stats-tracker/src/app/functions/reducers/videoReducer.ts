@@ -8,11 +8,10 @@ export type VideoPlayerAction =
 | {type: "SET_FFMPEG"; payload: FFmpeg | null}
 | {type: "SET_VOLUME"; payload: number}
 | {type: "SET_VIDEO_LENGTH"; payload: number}
-| {type: "SET_CURRENT_TIME"; payload: number}
 | {type: "SET_SOURCE"; payload: VideoSource}
 | {type: "ADD_VIDEO_SEGMENT"; payload: VideoSource}
 | {type: "INITIALIZE_VIDEO_SEGMENTS"; payload: string[]}
-| {type: "SET_SEEKED_TIME"; payload: number}
+| {type: "SET_VIDEO_REF"; payload : HTMLVideoElement | null}
 
 
 export default function VideoPlayerStateReducer(
@@ -50,11 +49,6 @@ export default function VideoPlayerStateReducer(
                 ...state, 
                 videoLength: action.payload,
               };
-        case "SET_CURRENT_TIME":
-            return {
-                ...state, 
-                currentTime: action.payload,
-            };
         case "SET_SOURCE":
             return {
                 ...state, 
@@ -77,10 +71,10 @@ export default function VideoPlayerStateReducer(
                 ...state,
                 videoSegments: action.payload
             }
-        case "SET_SEEKED_TIME":
+        case "SET_VIDEO_REF":
             return {
                 ...state,
-                seekedTime: action.payload
+                videoRef: action.payload
             }
 
         

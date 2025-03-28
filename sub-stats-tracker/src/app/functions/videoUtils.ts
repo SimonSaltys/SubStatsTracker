@@ -2,9 +2,9 @@ import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { Dispatch } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { VideoPlayerAction } from "./reducers/videoReducer";
-import { VideoPlayerState, VideoSource } from "../types/videoTypes";
+import { VideoPlayerState } from "../types/videoTypes";
 
-export const segmentLength = 60;
+export const segmentLength = 300;
 
 export async function loadffmpeg(dispatch : Dispatch<VideoPlayerAction>) {
     try{
@@ -32,29 +32,36 @@ export async function loadffmpeg(dispatch : Dispatch<VideoPlayerAction>) {
       }
 }
 
-export async function handleConversion(state : VideoPlayerState, dispatch : Dispatch<VideoPlayerAction>) {
-  const {currentTime, videoSegments,videoLength, ffmpeg, seekedTime} = state
+export async function handleConversion(state : VideoPlayerState, dispatch : Dispatch<VideoPlayerAction>, seekedTime : number) {
+  const {videoRef, videoSegments,videoLength, ffmpeg} = state
 
     try {
+        const video = videoRef
 
         if (!ffmpeg) {
             console.error('FFmpeg is not loaded')
             return
         }
 
-        if(currentTime > videoLength) {
+        if(seekedTime > videoLength) {
           console.error('Cannot load a segment over the video length')
           return
         }
 
-        let videoTime = currentTime
-        if(seekedTime !== -1){
-          videoTime = seekedTime
-          dispatch({
-            type:"SET_SEEKED_TIME",
-            payload:-1
-          })
+        let videoTime = 0
+
+        if(video) {
+          videoTime = video.currentTime
+
+          if(seekedTime !== -1){
+            videoTime = seekedTime
+            dispatch({
+              type:"SET_SEEKED_TIME",
+              payload:-1
+            })
+          }
         }
+       
 
         const videoSegmentIndex = findSegmentIndex(videoTime, videoSegments)
         const videoSegmentURL = videoSegments[videoSegmentIndex]
@@ -64,15 +71,21 @@ export async function handleConversion(state : VideoPlayerState, dispatch : Disp
 
         if(videoSegmentURL) {
           console.log("In this bucket the url is", videoSegmentURL)
-          dispatch({
-            type:"SET_SOURCE",
-            payload: {videoURL: videoSegmentURL, segmentIndex: videoSegmentIndex}
-          })
+
+          if(state.videoSrc.videoURL === videoSegmentURL) {
+              dispatch({
+                type: "SET_SEEKED_TIME",
+                payload: seekedTime
+            })
+            console.log("Setting seeked time", seekedTime)
+          } else {
+            dispatch({
+              type:"SET_SOURCE",
+              payload: {videoURL: videoSegmentURL, segmentIndex: videoSegmentIndex}
+            })
+          }
           return
         }
-         
-          
-
         const inputFileName = "S01E03.mkv"
         const outputFileName = "output" + videoSegmentIndex + ".mp4"
 
@@ -124,7 +137,12 @@ export async function handleConversion(state : VideoPlayerState, dispatch : Disp
 
 //private functions below
 
-export function findSegmentIndex(currentTime : number, videoSegments : string[]) {
+function loadSegment(state ) {
+
+}
+
+
+function findSegmentIndex(currentTime : number, videoSegments : string[]) {
   const index = Math.floor(currentTime/segmentLength);
   return index < videoSegments.length ? index : videoSegments.length;
 }
